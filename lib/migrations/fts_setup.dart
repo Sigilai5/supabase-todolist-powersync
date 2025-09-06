@@ -62,15 +62,28 @@ SqliteMigration createFtsMigration(
 /// with the data you would like to search on
 Future<void> configureFts(PowerSyncDatabase db) async {
   migrations
+    // Existing list search (name only)
     ..add(createFtsMigration(
-        migrationVersion: 1,
-        tableName: 'lists',
-        columns: ['name'],
-        tokenizationMethod: 'porter unicode61'))
+      migrationVersion: 1,
+      tableName: 'lists',
+      columns: ['name'],
+      tokenizationMethod: 'porter unicode61', // Uses porter stemmer
+    ))
+    
+    // Todo search (description with list_id as filter)
     ..add(createFtsMigration(
       migrationVersion: 2,
       tableName: 'todos',
-      columns: ['description', 'list_id'],
+      columns: ['description'],
+    ))
+    
+    // App logs search (action_type, details, and device_info)
+    ..add(createFtsMigration(
+      migrationVersion: 3,
+      tableName: 'app_logs',
+      columns: ['action_type', 'details', 'device_info'],
+      tokenizationMethod: 'porter unicode61',
     ));
+
   await migrations.migrate(db);
 }
